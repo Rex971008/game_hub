@@ -20,66 +20,23 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #050510; color: var(--text-color); overflow-x: hidden; }
 
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #050510;
-            color: var(--text-color);
-            overflow-x: hidden;
-        }
-
-        /* --- 動態背景輪播 (已加入備援圖片) --- */
-        .background-slideshow {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            list-style: none;
-        }
-
+        /* --- 動態背景輪播 --- */
+        .background-slideshow { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; list-style: none; }
         .background-slideshow li {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-size: cover;
-            background-position: center center;
-            opacity: 0;
-            animation: imageAnimation 30s linear infinite;
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+            background-size: cover; background-position: center center;
+            opacity: 0; animation: imageAnimation 30s linear infinite;
         }
-        
-        /* CSS會優先嘗試讀取本地的images/bg-*.jpg，如果失敗，會自動使用後面的unsplash連結 */
-        .background-slideshow li:nth-child(1) {
-            background-image: url('images/bg-1.jpg'), url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1470&q=80');
-        }
-        .background-slideshow li:nth-child(2) {
-            background-image: url('images/bg-2.jpg'), url('https://images.unsplash.com/photo-1554141311-929929384501?auto=format&fit=crop&w=1394&q=80');
-            animation-delay: 6s;
-        }
-        .background-slideshow li:nth-child(3) {
-            background-image: url('images/bg-3.jpg'), url('https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?auto=format&fit=crop&w=1555&q=80');
-            animation-delay: 12s;
-        }
-        .background-slideshow li:nth-child(4) {
-            background-image: url('images/bg-4.jpg'), url('https://images.unsplash.com/photo-1604079628040-94301bb21b91?auto=format&fit=crop&w=1374&q=80');
-            animation-delay: 18s;
-        }
-         .background-slideshow li:nth-child(5) {
-            background-image: url('images/bg-5.jpg'), url('https://images.unsplash.com/photo-1507525428034-b723a9ce6890?auto=format&fit=crop&w=1470&q=80');
-            animation-delay: 24s;
-        }
-
-        @keyframes imageAnimation {
-            0% { opacity: 0; animation-timing-function: ease-in; }
-            10% { opacity: 1; }
-            20% { opacity: 1; }
-            30% { opacity: 0; }
-            100% { opacity: 0; }
-        }
+        .background-slideshow li:nth-child(1) { background-image: url('images/bg-1.jpg'), url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1470&q=80'); }
+        .background-slideshow li:nth-child(2) { background-image: url('images/bg-2.jpg'), url('https://images.unsplash.com/photo-1554141311-929929384501?auto=format&fit=crop&w=1394&q=80'); animation-delay: 6s; }
+        .background-slideshow li:nth-child(3) { background-image: url('images/bg-3.jpg'), url('https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?auto=format&fit=crop&w=1555&q=80'); animation-delay: 12s; }
+        .background-slideshow li:nth-child(4) { background-image: url('images/bg-4.jpg'), url('https://images.unsplash.com/photo-1604079628040-94301bb21b91?auto=format&fit=crop&w=1374&q=80'); animation-delay: 18s; }
+        .background-slideshow li:nth-child(5) { background-image: url('images/bg-5.jpg'), url('https://images.unsplash.com/photo-1507525428034-b723a9ce6890?auto=format&fit=crop&w=1470&q=80'); animation-delay: 24s; }
+        @keyframes imageAnimation { 0% { opacity: 0; } 10% { opacity: 1; } 20% { opacity: 1; } 30% { opacity: 0; } 100% { opacity: 0; } }
 
         /* --- 頂部半透明選擇區 --- */
         header {
@@ -87,19 +44,33 @@
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
         }
-        .logo { font-size: 1.8rem; font-weight: 700; letter-spacing: 2px; text-shadow: 0 0 10px var(--primary-color); }
-        .controls { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .logo { font-weight: 700; letter-spacing: 2px; text-shadow: 0 0 10px var(--primary-color); font-size: clamp(1.5rem, 5vw + 0.5rem, 1.8rem); }
+
+        /* --- Collapsible Menu Styles --- */
+        #toggle-filters-btn {
+            display: none;
+            padding: 0.6rem 1.2rem; font-size: 1rem; font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.1); color: var(--text-color);
+            border: 1px solid var(--border-color); border-radius: 20px; cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .collapsible-menu {
+            display: flex; align-items: center; gap: 1rem; flex-grow: 1;
+            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding 0.4s ease-in-out;
+        }
         #search-box {
             padding: 0.6rem 1rem; border-radius: 20px; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.1);
-            color: var(--text-color); font-size: 1rem; transition: all 0.3s ease;
+            color: var(--text-color); font-size: 1rem; transition: all 0.3s ease; width: 100%; min-width: 200px;
         }
         #search-box:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 170, 255, 0.5); }
+        .filter-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
         .filter-buttons button {
             padding: 0.6rem 1.2rem; font-size: 1rem; font-weight: 500; color: var(--text-muted); background: transparent;
             border: 1px solid var(--border-color); border-radius: 20px; cursor: pointer; transition: all 0.3s ease;
         }
-        .filter-buttons button:hover { color: var(--text-color); background: rgba(0, 170, 255, 0.2); border-color: var(--primary-color); }
-        .filter-buttons button.active { color: #fff; background: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0, 170, 255, 0.7); }
+        .filter-buttons button:hover, .filter-buttons button.active {
+             color: #fff; background: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
+        }
 
         /* --- 滾動頁面推薦 --- */
         .scrolling-recommendations { width: 100%; background: linear-gradient(90deg, #ff8a00, #e52e71); color: white; padding: 0.5rem 0; overflow: hidden; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
@@ -112,25 +83,36 @@
         .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
         .card {
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; text-decoration: none; color: var(--text-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; backdrop-filter: blur(5px); display: flex; flex-direction: column;
         }
         .card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4); border-color: var(--primary-color); }
+        .card:active { transform: translateY(-2px) scale(0.98); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); }
         .card-image { width: 100%; height: 200px; background-size: cover; background-position: center; }
         .card-content { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .card h3 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700; }
+        .card h3 { margin-bottom: 0.5rem; font-weight: 700; font-size: clamp(1.25rem, 4vw + 0.5rem, 1.5rem); }
         .card p { font-size: 1rem; color: var(--text-muted); line-height: 1.6; flex-grow: 1; margin-bottom: 1rem; }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .tags-container { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .category-tag { padding: 0.3rem 0.8rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
-        .category-tag.game { background-color: #e53935; color: white; }
+        .category-tag.mobile-game { background-color: #f4511e; color: white; }
+        .category-tag.desktop-game { background-color: #e53935; color: white; }
         .category-tag.app { background-color: #43a047; color: white; }
-        .category-tag.website { background-color: #1e88e5; color: white; }
         
-        /* 響應式 */
+        /* --- MOBILE OPTIMIZATIONS --- */
         @media (max-width: 768px) {
-            header { flex-direction: column; padding: 1rem; }
-            .controls { justify-content: center; }
-            main { padding: 1.5rem; }
-            .card-container { grid-template-columns: 1fr; }
+            header { padding: 1rem; }
+            #toggle-filters-btn { display: flex; }
+            .collapsible-menu {
+                flex-basis: 100%; flex-direction: column; overflow: hidden;
+                max-height: 0; opacity: 0; padding: 0;
+            }
+            .collapsible-menu.is-open { max-height: 500px; opacity: 1; padding: 1.5rem 0 0.5rem 0; }
+            #search-box { min-width: unset; }
+            .filter-buttons { justify-content: center; }
+            main { padding: 1.5rem 1rem; }
+            .card-container { grid-template-columns: 1fr; gap: 1.5rem; }
+            .card p { line-height: 1.7; }
+            .scrolling-text { animation-duration: 40s; }
         }
     </style>
 </head>
@@ -140,25 +122,24 @@
 
     <header>
         <div class="logo">GameHub</div>
-        <div class="controls">
-            <input type="text" id="search-box" placeholder="搜索作品名稱...">
+        <button id="toggle-filters-btn" aria-controls="collapsible-menu" aria-expanded="false">篩選 ▼</button>
+        <div class="collapsible-menu" id="collapsible-menu">
+            <div class="search-container" style="width: 100%;">
+                <input type="text" id="search-box" placeholder="搜索作品名稱...">
+            </div>
             <div class="filter-buttons">
                 <button class="filter-btn active" data-filter="all">全部</button>
-                <button class="filter-btn" data-filter="遊戲">遊戲</button>
+                <button class="filter-btn" data-filter="手遊">手遊</button>
+                <button class="filter-btn" data-filter="桌機遊戲">桌機遊戲</button>
                 <button class="filter-btn" data-filter="應用">應用</button>
-                <button class="filter-btn" data-filter="官網">官網</button>
             </div>
         </div>
     </header>
     
     <div class="scrolling-recommendations">
         <div class="scrolling-text">
-             <span>🔥 熱門推薦：貓咪大亂鬥</span>
-             <span>✨ 最新上線：官網2.1</span>
-             <span>🧠 高效學習：單字卡</span>
-             <span>🎮 經典必玩：黃金礦工</span>
-             <span>🌲 冒險探索：叢林求生</span>
-             <span>🚀 高速射擊：ChromaShock Arena</span>
+             <span>🔥 熱門推薦：貓咪大亂鬥</span><span>✨ 最新上線：單字卡</span><span>🎮 經典必玩：黃金礦工</span>
+             <span>🌲 冒險探索：叢林求生</span><span>🚀 桌機專屬：ChromaShock Arena</span>
         </div>
     </div>
 
@@ -171,99 +152,104 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-        // --- 資料庫：圖片路徑已更新為本地路徑 + 備援網路路徑 ---
         const projects = [
-            { title: '睡夢遊戲', url: 'https://gabriel-0927.github.io/sleeping/sleep.html', description: '一款探索夢境與現實的奇幻遊戲，在睡夢中解開謎題，尋找真相。', localImage: 'images/sleeping-game.jpg', fallbackImage: 'https://images.unsplash.com/photo-1532521773413-c270034c264c?auto=format&fit=crop&q=80&w=1470', category: '遊戲' },
-            { title: '貓咪大亂鬥', url: 'https://gabriel-0927.github.io/Cat-brawl/', description: '集結你的貓咪軍團！充滿策略與趣味的塔防對戰遊戲，萌貓出擊，無人能敵。', localImage: 'images/cat-brawl.jpg', fallbackImage: 'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?auto=format&fit=crop&q=80&w=880', category: '遊戲' },
-            { title: '黃金礦工', url: 'https://gabriel-0927.github.io/gold-miner/', description: '經典重現！操作你的鉤爪，在限定時間內抓取地下的黃金與寶藏，挑戰高分。', localImage: 'images/gold-miner.jpg', fallbackImage: 'https://images.unsplash.com/photo-1621358352222-b2584d4b1793?auto=format&fit=crop&q=80&w=1470', category: '遊戲' },
-            { title: '叢林求生', url: 'https://rex971008.github.io/Jungle-Survival2/JungleSurvival.html', description: '你墜落在未知的叢林中，必須利用智慧和勇氣，尋找資源，建造庇護所，努力活下去。', localImage: 'images/jungle-survival.jpg', fallbackImage: 'https://images.unsplash.com/photo-1542317852-d370a256ae16?auto=format&fit=crop&q=80&w=1470', category: '遊戲' },
-            { title: '迷宮遊戲', url: 'https://rex971008.github.io/Rex/code%20(34).html', description: '挑戰你的方向感和邏輯思維，在複雜的迷宮中找到唯一的出口，你能多快完成？', localImage: 'images/maze-game.jpg', fallbackImage: 'https://images.unsplash.com/photo-1590216597244-3253c6903450?auto=format&fit=crop&q=80&w=1470', category: '遊戲' },
-            { title: 'ChromaShock Arena', url: 'https://rex971008.github.io/ChromaShockArena/', description: '進入色彩斑斕的競技場，體驗快節奏的射擊對決。精準的槍法和靈活的走位是致勝關鍵。', localImage: 'images/chromashock-arena.jpg', fallbackImage: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=1470', category: '遊戲' },
-            { title: 'TOUR EATS', url: 'https://rex971008.github.io/tour_eats_v1.1/code.html', description: '結合旅遊與美食的探索應用。發現你所在地的特色餐廳，規劃一場完美的味蕾之旅。', localImage: 'images/tour-eats.jpg', fallbackImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1374', category: '應用' },
-            { title: '單字卡', url: 'https://rex971008.github.io/flashcard/flashcard.html', description: '一個簡潔有效的單字卡應用，幫助您學習和記憶新詞彙，讓複習事半功倍。', localImage: 'images/flashcard.jpg', fallbackImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1470', category: '應用' },
-            { title: '官方網站 2.1', url: 'https://rex971008.github.io/--official-website-2.1/no_one_help_official_website_25.html', description: '團隊或個人的官方門戶，展示核心理念、最新動態與所有專案的集合地。', localImage: 'images/official-website.jpg', fallbackImage: 'https://images.unsplash.com/photo-1556740772-1a28a1a39f61?auto=format&fit=crop&q=80&w=1470', category: '官網' }
+            { title: '睡夢遊戲', url: 'https://gabriel-0927.github.io/sleeping/sleep.html', description: '一款探索夢境與現實的奇幻遊戲，在睡夢中解開謎題，尋找真相。', localImage: 'images/sleeping-game.jpg', fallbackImage: 'https://images.unsplash.com/photo-1532521773413-c270034c264c?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
+            { title: '貓咪大亂鬥', url: 'https://gabriel-0927.github.io/Cat-brawl/', description: '集結你的貓咪軍團！充滿策略與趣味的塔防對戰遊戲，萌貓出擊，無人能敵。', localImage: 'images/cat-brawl.jpg', fallbackImage: 'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?auto=format&fit=crop&q=80&w=880', category: ['手遊', '桌機遊戲'] },
+            { title: '黃金礦工', url: 'https://gabriel-0927.github.io/gold-miner/', description: '經典重現！操作你的鉤爪，在限定時間內抓取地下的黃金與寶藏，挑戰高分。', localImage: 'images/gold-miner.jpg', fallbackImage: 'https://images.unsplash.com/photo-1621358352222-b2584d4b1793?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
+            { title: '叢林求生', url: 'https://rex971008.github.io/Jungle-Survival2/JungleSurvival.html', description: '你墜落在未知的叢林中，必須利用智慧和勇氣，尋找資源，建造庇護所，努力活下去。', localImage: 'images/jungle-survival.jpg', fallbackImage: 'https://images.unsplash.com/photo-1542317852-d370a256ae16?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
+            { title: '迷宮遊戲', url: 'https://rex971008.github.io/maze/Maze_exploration_games.html', description: '挑戰你的方向感和邏輯思維，在複雜的迷宮中找到唯一的出口，你能多快完成？', localImage: 'images/maze-game.jpg', fallbackImage: 'https://images.unsplash.com/photo-1590216597244-3253c6903450?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
+            { title: 'ChromaShock Arena', url: 'https://rex971008.github.io/ChromaShockArena/', description: '進入色彩斑斕的競技場，體驗快節奏的射擊對決。精準的槍法和靈活的走位是致勝關鍵。', localImage: 'images/chromashock-arena.jpg', fallbackImage: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=1470', category: ['桌機遊戲'] },
+            { title: 'TOUR EATS', url: 'https://rex971008.github.io/tour_eats_v1.1/code.html', description: '結合旅遊與美食的探索應用。發現你所在地的特色餐廳，規劃一場完美的味蕾之旅。', localImage: 'images/tour-eats.jpg', fallbackImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1374', category: ['應用'] },
+            { title: '單字卡', url: 'https://rex971008.github.io/flashcard/flashcard.html', description: '一個簡潔有效的單字卡應用，幫助您學習和記憶新詞彙，讓複習事半功倍。', localImage: 'images/flashcard.jpg', fallbackImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1470', category: ['應用'] },
+            { title: '官方網站 2.1', url: 'https://rex971008.github.io/--official-website-2.1/no_one_help_official_website_25.html', description: '團隊或個人的官方門戶，展示核心理念、最新動態與所有專案的集合地。', localImage: 'images/official-website.jpg', fallbackImage: 'https://images.unsplash.com/photo-1556740772-1a28a1a39f61?auto=format&fit=crop&q=80&w=1470', category: ['應用'] }
         ];
 
         const cardContainer = document.getElementById('card-container');
         const searchBox = document.getElementById('search-box');
         const filterButtons = document.querySelectorAll('.filter-btn');
-        let processedProjects = []; // 用來儲存處理過圖片路徑的專案資料
+        let processedProjects = [];
 
-        /**
-         * 檢查圖片是否存在，如果不存在則使用備援路徑
-         * @param {string} localPath - 本地圖片路徑
-         * @param {string} fallbackPath - 備援圖片路徑
-         * @returns {Promise<string>} - 回傳最終可用的圖片路徑
-         */
+        const toggleBtn = document.getElementById('toggle-filters-btn');
+        const collapsibleMenu = document.getElementById('collapsible-menu');
+
+        function closeMenu() {
+            collapsibleMenu.classList.remove('is-open');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.textContent = '篩選 ▼';
+        }
+
+        toggleBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevents the click from reaching the document listener
+            const isOpen = collapsibleMenu.classList.contains('is-open');
+            if (isOpen) {
+                closeMenu();
+            } else {
+                collapsibleMenu.classList.add('is-open');
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                toggleBtn.textContent = '收合 ▲';
+            }
+        });
+        
+        // --- NEW: Shared handler for outside interactions ---
+        function handleOutsideInteraction(event) {
+            if (!collapsibleMenu.classList.contains('is-open')) return;
+            
+            // Check if the interaction target is outside the menu itself
+            if (!collapsibleMenu.contains(event.target)) {
+                closeMenu();
+            }
+        }
+
+        // --- NEW: Attach BOTH listeners for click and touchstart ---
+        document.addEventListener('click', handleOutsideInteraction);
+        document.addEventListener('touchstart', handleOutsideInteraction);
+
+        // Prevent menu from closing when interacting with its content
+        collapsibleMenu.addEventListener('click', (event) => event.stopPropagation());
+        collapsibleMenu.addEventListener('touchstart', (event) => event.stopPropagation());
+
         function checkImage(localPath, fallbackPath) {
             return new Promise((resolve) => {
                 const img = new Image();
-                img.onload = () => resolve(localPath); // 圖片載入成功，使用本地路徑
-                img.onerror = () => resolve(fallbackPath); // 圖片載入失敗，使用備援路徑
+                img.onload = () => resolve(localPath);
+                img.onerror = () => resolve(fallbackPath);
                 img.src = localPath;
             });
         }
-
-        // --- 渲染卡片函式 ---
+        
         function renderCards(projectsToRender) {
             cardContainer.innerHTML = '';
             if (projectsToRender.length === 0) {
                 cardContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 1.2rem; grid-column: 1 / -1; text-align: center;">找不到符合條件的項目...<p>';
                 return;
             }
-
+            const categoryClassMap = { '手遊': 'mobile-game', '桌機遊戲': 'desktop-game', '應用': 'app' };
             projectsToRender.forEach(project => {
-                const categoryClass = project.category === '遊戲' ? 'game' : (project.category === '應用' ? 'app' : 'website');
-                // 注意這裡使用的是 project.finalImage
-                const card = `
+                const tagsHTML = project.category.map(cat => `<span class="category-tag ${categoryClassMap[cat] || ''}">${cat}</span>`).join('');
+                cardContainer.innerHTML += `
                     <a href="${project.url}" target="_blank" class="card">
                         <div class="card-image" style="background-image: url('${project.finalImage}')"></div>
-                        <div class="card-content">
-                            <h3>${project.title}</h3>
-                            <p>${project.description}</p>
-                            <div class="card-footer">
-                                <span class="category-tag ${categoryClass}">${project.category}</span>
-                            </div>
+                        <div class="card-content"><h3>${project.title}</h3><p>${project.description}</p>
+                            <div class="card-footer"><div class="tags-container">${tagsHTML}</div></div>
                         </div>
-                    </a>
-                `;
-                cardContainer.innerHTML += card;
+                    </a>`;
             });
         }
 
-        // --- 篩選與搜索函式 ---
         function filterAndSearch() {
             const searchTerm = searchBox.value.toLowerCase();
             const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-
-            const filteredProjects = processedProjects.filter(project => {
-                const matchesCategory = activeFilter === 'all' || project.category === activeFilter;
-                const matchesSearch = project.title.toLowerCase().includes(searchTerm);
-                return matchesCategory && matchesSearch;
-            });
-
+            const filteredProjects = processedProjects.filter(project => 
+                (activeFilter === 'all' || project.category.includes(activeFilter)) && project.title.toLowerCase().includes(searchTerm)
+            );
             renderCards(filteredProjects);
         }
 
-        // --- 頁面初始化函式 ---
         async function initializePage() {
-            // 建立一個檢查所有圖片的 Promise 陣列
             const imageChecks = projects.map(p => checkImage(p.localImage, p.fallbackImage));
-            
-            // 等待所有圖片都檢查完成
             const finalImagePaths = await Promise.all(imageChecks);
-            
-            // 將檢查後的最終圖片路徑合併回專案資料中
-            processedProjects = projects.map((project, index) => {
-                return {
-                    ...project, // 複製所有原始屬性
-                    finalImage: finalImagePaths[index] // 添加最終確認的圖片路徑
-                };
-            });
-            
-            // 進行初始渲染和設定事件監聽
+            processedProjects = projects.map((project, index) => ({ ...project, finalImage: finalImagePaths[index] }));
             filterAndSearch();
-            
             searchBox.addEventListener('input', filterAndSearch);
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
@@ -274,7 +260,6 @@
             });
         }
 
-        // --- 執行初始化 ---
         initializePage();
     });
     </script>
