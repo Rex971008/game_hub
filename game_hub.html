@@ -172,41 +172,41 @@
         const toggleBtn = document.getElementById('toggle-filters-btn');
         const collapsibleMenu = document.getElementById('collapsible-menu');
 
-        function closeMenu() {
-            collapsibleMenu.classList.remove('is-open');
-            toggleBtn.setAttribute('aria-expanded', 'false');
-            toggleBtn.textContent = '篩選 ▼';
+        // --- CORRECTED: Collapsible menu logic ---
+
+        // Helper function to update menu state (text and ARIA attributes)
+        function updateMenuState(isOpen) {
+            collapsibleMenu.classList.toggle('is-open', isOpen);
+            toggleBtn.setAttribute('aria-expanded', isOpen);
+            toggleBtn.textContent = isOpen ? '收合 ▲' : '篩選 ▼';
         }
 
-        toggleBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevents the click from reaching the document listener
-            const isOpen = collapsibleMenu.classList.contains('is-open');
-            if (isOpen) {
-                closeMenu();
-            } else {
-                collapsibleMenu.classList.add('is-open');
-                toggleBtn.setAttribute('aria-expanded', 'true');
-                toggleBtn.textContent = '收合 ▲';
-            }
+        // Toggle button's only job is to switch the state
+        toggleBtn.addEventListener('click', () => {
+            const isOpen = !collapsibleMenu.classList.contains('is-open');
+            updateMenuState(isOpen);
         });
-        
-        // --- NEW: Shared handler for outside interactions ---
+
+        // Universal handler for clicks and touches outside the menu
         function handleOutsideInteraction(event) {
-            if (!collapsibleMenu.classList.contains('is-open')) return;
-            
-            // Check if the interaction target is outside the menu itself
-            if (!collapsibleMenu.contains(event.target)) {
-                closeMenu();
+            // Do nothing if the menu is already closed
+            if (!collapsibleMenu.classList.contains('is-open')) {
+                return;
             }
+
+            // Check if the event target is the button OR inside the menu
+            // If it is, let other listeners handle it.
+            if (toggleBtn.contains(event.target) || collapsibleMenu.contains(event.target)) {
+                return;
+            }
+            
+            // If the interaction is truly outside, close the menu
+            updateMenuState(false);
         }
 
-        // --- NEW: Attach BOTH listeners for click and touchstart ---
         document.addEventListener('click', handleOutsideInteraction);
         document.addEventListener('touchstart', handleOutsideInteraction);
 
-        // Prevent menu from closing when interacting with its content
-        collapsibleMenu.addEventListener('click', (event) => event.stopPropagation());
-        collapsibleMenu.addEventListener('touchstart', (event) => event.stopPropagation());
 
         function checkImage(localPath, fallbackPath) {
             return new Promise((resolve) => {
