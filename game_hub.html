@@ -29,14 +29,27 @@
         .background-slideshow li {
             width: 100%; height: 100%; position: absolute; top: 0; left: 0;
             background-size: cover; background-position: center center;
-            opacity: 0; animation: imageAnimation 30s linear infinite;
+            opacity: 0; 
+            animation: imageAnimation 60s linear infinite;
         }
         .background-slideshow li:nth-child(1) { background-image: url('images/bg-1.jpg'), url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1470&q=80'); }
         .background-slideshow li:nth-child(2) { background-image: url('images/bg-2.jpg'), url('https://images.unsplash.com/photo-1554141311-929929384501?auto=format&fit=crop&w=1394&q=80'); animation-delay: 6s; }
         .background-slideshow li:nth-child(3) { background-image: url('images/bg-3.jpg'), url('https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?auto=format&fit=crop&w=1555&q=80'); animation-delay: 12s; }
         .background-slideshow li:nth-child(4) { background-image: url('images/bg-4.jpg'), url('https://images.unsplash.com/photo-1604079628040-94301bb21b91?auto=format&fit=crop&w=1374&q=80'); animation-delay: 18s; }
         .background-slideshow li:nth-child(5) { background-image: url('images/bg-5.jpg'), url('https://images.unsplash.com/photo-1507525428034-b723a9ce6890?auto=format&fit=crop&w=1470&q=80'); animation-delay: 24s; }
-        @keyframes imageAnimation { 0% { opacity: 0; } 10% { opacity: 1; } 20% { opacity: 1; } 30% { opacity: 0; } 100% { opacity: 0; } }
+        .background-slideshow li:nth-child(6) { background-image: url('images/bg-6.jpg'), url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1429&q=80'); animation-delay: 30s; }
+        .background-slideshow li:nth-child(7) { background-image: url('images/bg-7.jpg'), url('https://images.unsplash.com/photo-1553356084-58ef4a67b2a7?auto=format&fit=crop&w=1374&q=80'); animation-delay: 36s; }
+        .background-slideshow li:nth-child(8) { background-image: url('images/bg-8.jpg'), url('https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1548&q=80'); animation-delay: 42s; }
+        .background-slideshow li:nth-child(9) { background-image: url('images/bg-9.jpg'), url('https://images.unsplash.com/photo-1579546929662-711aa81148cf?auto=format&fit=crop&w=1470&q=80'); animation-delay: 48s; }
+        .background-slideshow li:nth-child(10) { background-image: url('images/bg-10.jpg'), url('https://images.unsplash.com/photo-1605792637384-5275a3933b39?auto=format&fit=crop&w=1470&q=80'); animation-delay: 54s; }
+        
+        @keyframes imageAnimation {
+            0% { opacity: 0; animation-timing-function: ease-in; }
+            1% { opacity: 1; }
+            9% { opacity: 1; }
+            10% { opacity: 0; }
+            100% { opacity: 0; }
+        }
 
         /* --- 頂部半透明選擇區 --- */
         header {
@@ -55,12 +68,13 @@
             transition: background-color 0.3s, border-color 0.3s;
         }
         .collapsible-menu {
-            display: flex; align-items: center; gap: 1rem; flex-grow: 1;
+            display: flex; align-items: center; gap: 1rem;
             transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding 0.4s ease-in-out;
         }
+        .search-wrapper { flex-shrink: 0; }
         #search-box {
             padding: 0.6rem 1rem; border-radius: 20px; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.1);
-            color: var(--text-color); font-size: 1rem; transition: all 0.3s ease; width: 100%; min-width: 200px;
+            color: var(--text-color); font-size: 1rem; transition: all 0.3s ease;
         }
         #search-box:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 170, 255, 0.5); }
         .filter-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -98,7 +112,7 @@
         .category-tag.desktop-game { background-color: #e53935; color: white; }
         .category-tag.app { background-color: #43a047; color: white; }
         
-        /* --- MOBILE OPTIMIZATIONS --- */
+        /* --- MOBILE OPTIMIZATIONS (max-width: 768px) --- */
         @media (max-width: 768px) {
             header { padding: 1rem; }
             #toggle-filters-btn { display: flex; }
@@ -107,24 +121,40 @@
                 max-height: 0; opacity: 0; padding: 0;
             }
             .collapsible-menu.is-open { max-height: 500px; opacity: 1; padding: 1.5rem 0 0.5rem 0; }
-            #search-box { min-width: unset; }
+            .search-wrapper { width: 100%; }
+            #search-box { width: 100%; }
             .filter-buttons { justify-content: center; }
             main { padding: 1.5rem 1rem; }
             .card-container { grid-template-columns: 1fr; gap: 1.5rem; }
             .card p { line-height: 1.7; }
             .scrolling-text { animation-duration: 40s; }
         }
+        
+        /* --- NEW: Desktop-specific layout (min-width: 769px) --- */
+        @media (min-width: 769px) {
+            .collapsible-menu {
+                flex-grow: 1; /* Allow menu to take up space */
+                justify-content: flex-end; /* Align items to the right */
+            }
+            #search-box {
+                width: 280px; /* Set a specific width for the search box */
+            }
+        }
     </style>
 </head>
 <body>
 
-    <ul class="background-slideshow"><li></li><li></li><li></li><li></li><li></li></ul>
+    <ul class="background-slideshow">
+        <li></li><li></li><li></li><li></li><li></li>
+        <li></li><li></li><li></li><li></li><li></li>
+    </ul>
 
     <header>
         <div class="logo">GameHub</div>
         <button id="toggle-filters-btn" aria-controls="collapsible-menu" aria-expanded="false">篩選 ▼</button>
         <div class="collapsible-menu" id="collapsible-menu">
-            <div class="search-container" style="width: 100%;">
+            <!-- UPDATED: Search wrapper for better control -->
+            <div class="search-wrapper">
                 <input type="text" id="search-box" placeholder="搜索作品名稱...">
             </div>
             <div class="filter-buttons">
@@ -153,15 +183,17 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         const projects = [
-            { title: '睡夢遊戲', url: 'https://gabriel-0927.github.io/sleeping/sleep.html', description: '一款探索夢境與現實的奇幻遊戲，在睡夢中解開謎題，尋找真相。', localImage: 'images/sleeping-game.jpg', fallbackImage: 'https://images.unsplash.com/photo-1532521773413-c270034c264c?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
-            { title: '貓咪大亂鬥', url: 'https://gabriel-0927.github.io/Cat-brawl/', description: '集結你的貓咪軍團！充滿策略與趣味的塔防對戰遊戲，萌貓出擊，無人能敵。', localImage: 'images/cat-brawl.jpg', fallbackImage: 'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?auto=format&fit=crop&q=80&w=880', category: ['手遊', '桌機遊戲'] },
-            { title: '黃金礦工', url: 'https://gabriel-0927.github.io/gold-miner/', description: '經典重現！操作你的鉤爪，在限定時間內抓取地下的黃金與寶藏，挑戰高分。', localImage: 'images/gold-miner.jpg', fallbackImage: 'https://images.unsplash.com/photo-1621358352222-b2584d4b1793?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
-            { title: '叢林求生', url: 'https://rex971008.github.io/Jungle-Survival2/JungleSurvival.html', description: '你墜落在未知的叢林中，必須利用智慧和勇氣，尋找資源，建造庇護所，努力活下去。', localImage: 'images/jungle-survival.jpg', fallbackImage: 'https://images.unsplash.com/photo-1542317852-d370a256ae16?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
-            { title: '迷宮遊戲', url: 'https://rex971008.github.io/maze/Maze_exploration_games.html', description: '挑戰你的方向感和邏輯思維，在複雜的迷宮中找到唯一的出口，你能多快完成？', localImage: 'images/maze-game.jpg', fallbackImage: 'https://images.unsplash.com/photo-1590216597244-3253c6903450?auto=format&fit=crop&q=80&w=1470', category: ['手遊', '桌機遊戲'] },
+            { title: '睡夢遊戲', url: 'https://gabriel-0927.github.io/sleeping/sleep.html', description: '一款探索夢境與現實的奇幻遊戲，在睡夢中解開謎題，尋找真相。', localImage: 'images/sleeping-game.jpg', fallbackImage: 'https://images.pexels.com/photos/1624496/pexels-photo-1624496.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            { title: '貓咪大亂鬥', url: 'https://gabriel-0927.github.io/Cat-brawl/', description: '集結你的貓咪軍團！充滿策略與趣味的塔防對戰遊戲，萌貓出擊，無人能敵。', localImage: 'images/cat-brawl.jpg', fallbackImage: 'https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            { title: '黃金礦工', url: 'https://gabriel-0927.github.io/gold-miner/', description: '經典重現！操作你的鉤爪，在限定時間內抓取地下的黃金與寶藏，挑戰高分。', localImage: 'images/gold-miner.jpg', fallbackImage: 'https://images.pexels.com/photos/85768/gold-gold-nugget-nuggets-minerals-85768.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            { title: '叢林求生', url: 'https://rex971008.github.io/Jungle-Survival2/JungleSurvival.html', description: '你墜落在未知的叢林中，必須利用智慧和勇氣，尋找資源，建造庇護所，努力活下去。', localImage: 'images/jungle-survival.jpg', fallbackImage: 'https://images.pexels.com/photos/1528640/pexels-photo-1528640.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            { title: '迷宮遊戲', url: 'https://rex971008.github.io/maze/Maze_exploration_games.html', description: '挑戰你的方向感和邏輯思維，在複雜的迷宮中找到唯一的出口，你能多快完成？', localImage: 'images/maze-game.jpg', fallbackImage: 'https://images.pexels.com/photos/158471/pexels-photo-158471.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            { title: '收集星星', url: 'https://rex971008.github.io/starcollect/starcollect.html', description: '在限定時間內收集所有閃爍的星星，挑戰你的反應速度和操作技巧。', localImage: 'images/star-collect.jpg', fallbackImage: 'https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            { title: '賽車起跑', url: 'https://rex971008.github.io/racingstart/racing%20start.html', description: '屏住呼吸，在信號燈轉綠的瞬間完美起跑！考驗你極限反應的賽車遊戲。', localImage: 'images/racing-start.jpg', fallbackImage: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: 'ChromaShock Arena', url: 'https://rex971008.github.io/ChromaShockArena/', description: '進入色彩斑斕的競技場，體驗快節奏的射擊對決。精準的槍法和靈活的走位是致勝關鍵。', localImage: 'images/chromashock-arena.jpg', fallbackImage: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=1470', category: ['桌機遊戲'] },
             { title: 'TOUR EATS', url: 'https://rex971008.github.io/tour_eats_v1.1/code.html', description: '結合旅遊與美食的探索應用。發現你所在地的特色餐廳，規劃一場完美的味蕾之旅。', localImage: 'images/tour-eats.jpg', fallbackImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1374', category: ['應用'] },
             { title: '單字卡', url: 'https://rex971008.github.io/flashcard/flashcard.html', description: '一個簡潔有效的單字卡應用，幫助您學習和記憶新詞彙，讓複習事半功倍。', localImage: 'images/flashcard.jpg', fallbackImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1470', category: ['應用'] },
-            { title: '官方網站 2.1', url: 'https://rex971008.github.io/--official-website-2.1/no_one_help_official_website_25.html', description: '團隊或個人的官方門戶，展示核心理念、最新動態與所有專案的集合地。', localImage: 'images/official-website.jpg', fallbackImage: 'https://images.unsplash.com/photo-1556740772-1a28a1a39f61?auto=format&fit=crop&q=80&w=1470', category: ['應用'] }
+            { title: '官方網站 2.1', url: 'https://rex971008.github.io/--official-website-2.1/no_one_help_official_website_25.html', description: '團隊或個人的官方門戶，展示核心理念、最新動態與所有專案的集合地。', localImage: 'images/official-website.jpg', fallbackImage: 'https://images.pexels.com/photos/326503/pexels-photo-326503.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['應用'] }
         ];
 
         const cardContainer = document.getElementById('card-container');
@@ -172,41 +204,25 @@
         const toggleBtn = document.getElementById('toggle-filters-btn');
         const collapsibleMenu = document.getElementById('collapsible-menu');
 
-        // --- CORRECTED: Collapsible menu logic ---
-
-        // Helper function to update menu state (text and ARIA attributes)
         function updateMenuState(isOpen) {
             collapsibleMenu.classList.toggle('is-open', isOpen);
             toggleBtn.setAttribute('aria-expanded', isOpen);
             toggleBtn.textContent = isOpen ? '收合 ▲' : '篩選 ▼';
         }
 
-        // Toggle button's only job is to switch the state
         toggleBtn.addEventListener('click', () => {
             const isOpen = !collapsibleMenu.classList.contains('is-open');
             updateMenuState(isOpen);
         });
 
-        // Universal handler for clicks and touches outside the menu
         function handleOutsideInteraction(event) {
-            // Do nothing if the menu is already closed
-            if (!collapsibleMenu.classList.contains('is-open')) {
-                return;
-            }
-
-            // Check if the event target is the button OR inside the menu
-            // If it is, let other listeners handle it.
-            if (toggleBtn.contains(event.target) || collapsibleMenu.contains(event.target)) {
-                return;
-            }
-            
-            // If the interaction is truly outside, close the menu
+            if (!collapsibleMenu.classList.contains('is-open')) return;
+            if (toggleBtn.contains(event.target) || collapsibleMenu.contains(event.target)) return;
             updateMenuState(false);
         }
 
         document.addEventListener('click', handleOutsideInteraction);
         document.addEventListener('touchstart', handleOutsideInteraction);
-
 
         function checkImage(localPath, fallbackPath) {
             return new Promise((resolve) => {
