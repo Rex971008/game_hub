@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>作品展示平台</title>
+    <title>GAME HUB (rex.io)</title>
     <style>
         /* --- 全局樣式與字體設定 --- */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -130,7 +130,7 @@
             .scrolling-text { animation-duration: 40s; }
         }
         
-        /* --- NEW: Desktop-specific layout (min-width: 769px) --- */
+        /* --- Desktop-specific layout (min-width: 769px) --- */
         @media (min-width: 769px) {
             .collapsible-menu {
                 flex-grow: 1; /* Allow menu to take up space */
@@ -153,7 +153,6 @@
         <div class="logo">GameHub</div>
         <button id="toggle-filters-btn" aria-controls="collapsible-menu" aria-expanded="false">篩選 ▼</button>
         <div class="collapsible-menu" id="collapsible-menu">
-            <!-- UPDATED: Search wrapper for better control -->
             <div class="search-wrapper">
                 <input type="text" id="search-box" placeholder="搜索作品名稱...">
             </div>
@@ -189,7 +188,9 @@
             { title: '叢林求生', url: 'https://rex971008.github.io/Jungle-Survival2/JungleSurvival.html', description: '你墜落在未知的叢林中，必須利用智慧和勇氣，尋找資源，建造庇護所，努力活下去。', localImage: 'images/jungle-survival.jpg', fallbackImage: 'https://images.pexels.com/photos/1528640/pexels-photo-1528640.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '迷宮遊戲', url: 'https://rex971008.github.io/maze/Maze_exploration_games.html', description: '挑戰你的方向感和邏輯思維，在複雜的迷宮中找到唯一的出口，你能多快完成？', localImage: 'images/maze-game.jpg', fallbackImage: 'https://images.pexels.com/photos/158471/pexels-photo-158471.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '收集星星', url: 'https://rex971008.github.io/starcollect/starcollect.html', description: '在限定時間內收集所有閃爍的星星，挑戰你的反應速度和操作技巧。', localImage: 'images/star-collect.jpg', fallbackImage: 'https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
-            { title: '賽車起跑', url: 'https://rex971008.github.io/racingstart/racing%20start.html', description: '屏住呼吸，在信號燈轉綠的瞬間完美起跑！考驗你極限反應的賽車遊戲。', localImage: 'images/racing-start.jpg', fallbackImage: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            { title: '賽車起跑', url: 'https://rex971008.github.io/racingstart/racing%20start.html', description: '屏住呼吸，在信號燈熄滅的瞬間完美起跑！考驗你極限反應的賽車遊戲。', localImage: 'images/racing-start.jpg', fallbackImage: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            // NEW: Added new game "Kitchen Katterwaul"
+            { title: '胡鬧貓廚房', url: 'https://rex971008.github.io/kitchen_katterwaul/kitchen_katterwaul.html', description: '與朋友合作或對抗，在混亂的廚房中完成訂單！考驗你們的默契與反應。', localImage: 'images/kitchen-katterwaul.jpg', fallbackImage: 'https://images.pexels.com/photos/887827/pexels-photo-887827.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: 'ChromaShock Arena', url: 'https://rex971008.github.io/ChromaShockArena/', description: '進入色彩斑斕的競技場，體驗快節奏的射擊對決。精準的槍法和靈活的走位是致勝關鍵。', localImage: 'images/chromashock-arena.jpg', fallbackImage: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=1470', category: ['桌機遊戲'] },
             { title: 'TOUR EATS', url: 'https://rex971008.github.io/tour_eats_v1.1/code.html', description: '結合旅遊與美食的探索應用。發現你所在地的特色餐廳，規劃一場完美的味蕾之旅。', localImage: 'images/tour-eats.jpg', fallbackImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1374', category: ['應用'] },
             { title: '單字卡', url: 'https://rex971008.github.io/flashcard/flashcard.html', description: '一個簡潔有效的單字卡應用，幫助您學習和記憶新詞彙，讓複習事半功倍。', localImage: 'images/flashcard.jpg', fallbackImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1470', category: ['應用'] },
