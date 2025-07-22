@@ -51,11 +51,63 @@
             100% { opacity: 0; }
         }
 
+        /* --- (新增) 側邊欄與漢堡選單 --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1001; /* 必須比遮罩層高 */
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-top: 5rem;
+            border-right: 1px solid var(--border-color);
+        }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li a {
+            display: block; padding: 1rem 2rem; color: var(--text-color);
+            text-decoration: none; font-size: 1.1rem; font-weight: 500;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background-color: rgba(0, 170, 255, 0.2);
+            color: var(--primary-color);
+        }
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.5); z-index: 1000;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.35s ease-in-out;
+        }
+        .sidebar-toggle-btn {
+            background: none; border: none; cursor: pointer; padding: 10px;
+            z-index: 1002; /* 確保在最上層 */
+            display: flex; flex-direction: column; justify-content: space-around;
+            width: 40px; height: 40px;
+        }
+        .sidebar-toggle-btn .line {
+            width: 100%; height: 3px; background-color: var(--text-color);
+            border-radius: 3px; transition: all 0.3s ease-in-out;
+        }
+
+        /* 當側邊欄打開時的樣式變化 */
+        body.sidebar-open .sidebar { transform: translateX(0); }
+        body.sidebar-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
+        body.sidebar-open .sidebar-toggle-btn .line1 { transform: rotate(45deg) translate(7px, 7px); }
+        body.sidebar-open .sidebar-toggle-btn .line2 { opacity: 0; }
+        body.sidebar-open .sidebar-toggle-btn .line3 { transform: rotate(-45deg) translate(7px, -7px); }
+
+
         /* --- 頂部半透明選擇區 --- */
         header {
             position: sticky; top: 0; z-index: 100; padding: 1rem 2rem; background: rgba(10, 10, 20, 0.5);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; 
+            gap: 1.5rem; /* (修改) 調整間距以容納新按鈕 */
         }
         .logo { font-weight: 700; letter-spacing: 2px; text-shadow: 0 0 10px var(--primary-color); font-size: clamp(1.5rem, 5vw + 0.5rem, 1.8rem); }
 
@@ -115,6 +167,7 @@
         /* --- MOBILE OPTIMIZATIONS (max-width: 768px) --- */
         @media (max-width: 768px) {
             header { padding: 1rem; }
+            .sidebar-toggle-btn { transform: scale(0.85); } /* (新增) 手機版按鈕稍小一點 */
             #toggle-filters-btn { display: flex; }
             .collapsible-menu {
                 flex-basis: 100%; flex-direction: column; overflow: hidden;
@@ -144,12 +197,30 @@
 </head>
 <body>
 
+    <!-- (新增) 側邊欄與遮罩層 -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <nav id="sidebar" class="sidebar">
+        <ul>
+            <li><a href="#" class="active">主頁</a></li>
+            <!-- 未來可以新增更多連結 -->
+            <!-- <li><a href="#">關於我們</a></li> -->
+            <!-- <li><a href="#">聯絡方式</a></li> -->
+        </ul>
+    </nav>
+
     <ul class="background-slideshow">
         <li></li><li></li><li></li><li></li><li></li>
         <li></li><li></li><li></li><li></li><li></li>
     </ul>
 
     <header>
+        <!-- (新增) 漢堡選單按鈕 -->
+        <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Toggle Menu" aria-expanded="false">
+            <span class="line line1"></span>
+            <span class="line line2"></span>
+            <span class="line line3"></span>
+        </button>
+
         <div class="logo">GameHub</div>
         <button id="toggle-filters-btn" aria-controls="collapsible-menu" aria-expanded="false">篩選 ▼</button>
         <div class="collapsible-menu" id="collapsible-menu">
@@ -181,6 +252,22 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
+        // --- (新增) 側邊欄控制 ---
+        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        const toggleSidebar = () => {
+            document.body.classList.toggle('sidebar-open');
+            const isSidebarOpen = document.body.classList.contains('sidebar-open');
+            sidebarToggleBtn.setAttribute('aria-expanded', isSidebarOpen);
+        };
+
+        sidebarToggleBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+        // --- 側邊欄控制結束 ---
+
+
         const projects = [
             { title: '睡夢遊戲', url: 'https://gabriel-0927.github.io/sleeping/sleep.html', description: '一款探索夢境與現實的奇幻遊戲，在睡夢中解開謎題，尋找真相。', localImage: 'images/sleeping-game.jpg', fallbackImage: 'https://images.pexels.com/photos/1624496/pexels-photo-1624496.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '貓咪大亂鬥', url: 'https://gabriel-0927.github.io/Cat-brawl/', description: '集結你的貓咪軍團！充滿策略與趣味的塔防對戰遊戲，萌貓出擊，無人能敵。', localImage: 'images/cat-brawl.jpg', fallbackImage: 'https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
@@ -189,11 +276,14 @@
             { title: '迷宮遊戲', url: 'https://rex971008.github.io/maze/Maze_exploration_games.html', description: '挑戰你的方向感和邏輯思維，在複雜的迷宮中找到唯一的出口，你能多快完成？', localImage: 'images/maze-game.jpg', fallbackImage: 'https://images.pexels.com/photos/158471/pexels-photo-158471.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '收集星星', url: 'https://rex971008.github.io/starcollect/starcollect.html', description: '在限定時間內收集所有閃爍的星星，挑戰你的反應速度和操作技巧。', localImage: 'images/star-collect.jpg', fallbackImage: 'https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '賽車起跑', url: 'https://rex971008.github.io/racingstart/racing%20start.html', description: '屏住呼吸，在信號燈熄滅的瞬間完美起跑！考驗你極限反應的賽車遊戲。', localImage: 'images/racing-start.jpg', fallbackImage: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
-            // NEW: Added new game "Kitchen Katterwaul"
             { title: '胡鬧貓廚房', url: 'https://rex971008.github.io/kitchen_katterwaul/kitchen_katterwaul.html', description: '與朋友合作或對抗，在混亂的廚房中完成訂單！考驗你們的默契與反應。', localImage: 'images/kitchen-katterwaul.jpg', fallbackImage: 'https://images.pexels.com/photos/887827/pexels-photo-887827.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
+            // NEW: Added AI Drawing Game
+            { title: 'AI創世繪', url: 'https://gabriel-0927.github.io/draw/draw.html', description: '根據關鍵字生成獨特圖像，體驗AI繪圖的魔力與無限可能性。', localImage: 'images/ai-drawing.jpg', fallbackImage: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: 'ChromaShock Arena', url: 'https://rex971008.github.io/ChromaShockArena/', description: '進入色彩斑斕的競技場，體驗快節奏的射擊對決。精準的槍法和靈活的走位是致勝關鍵。', localImage: 'images/chromashock-arena.jpg', fallbackImage: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=1470', category: ['桌機遊戲'] },
             { title: 'TOUR EATS', url: 'https://rex971008.github.io/tour_eats_v1.1/code.html', description: '結合旅遊與美食的探索應用。發現你所在地的特色餐廳，規劃一場完美的味蕾之旅。', localImage: 'images/tour-eats.jpg', fallbackImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1374', category: ['應用'] },
             { title: '單字卡', url: 'https://rex971008.github.io/flashcard/flashcard.html', description: '一個簡潔有效的單字卡應用，幫助您學習和記憶新詞彙，讓複習事半功倍。', localImage: 'images/flashcard.jpg', fallbackImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1470', category: ['應用'] },
+            // NEW: Added Photo Booth App
+            { title: '拍貼機', url: 'https://stellar-muffin-de6334.netlify.app/', description: '選擇喜歡的相框，製作屬於你的個性化拍貼照片，留下美好回憶。', localImage: 'images/photo-booth.jpg', fallbackImage: 'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['應用'] },
             { title: '官方網站 2.1', url: 'https://rex971008.github.io/--official-website-2.1/no_one_help_official_website_25.html', description: '團隊或個人的官方門戶，展示核心理念、最新動態與所有專案的集合地。', localImage: 'images/official-website.jpg', fallbackImage: 'https://images.pexels.com/photos/326503/pexels-photo-326503.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['應用'] }
         ];
 
