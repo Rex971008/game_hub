@@ -14,6 +14,9 @@
             --text-color: #f0f0f0;
             --text-muted: #a0a0b0;
             --border-color: rgba(255, 255, 255, 0.2);
+            --modal-bg: rgba(20, 20, 30, 0.95); /* 模態框內部背景 */
+            --modal-border: rgba(0, 170, 255, 0.8); /* 模態框邊框顏色 */
+            --control-bg: rgba(30, 30, 45, 0.9); /* 控制區背景 */
         }
 
         * {
@@ -22,7 +25,17 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #050510; color: var(--text-color); overflow-x: hidden; }
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #050510; 
+            color: var(--text-color); 
+            overflow-x: hidden; 
+            transition: overflow 0.3s ease; /* 為 body overflow 變化添加過渡 */
+        }
+        /* 當模態框打開時阻止主頁面滾動 */
+        body.modal-open {
+            overflow: hidden;
+        }
 
         /* --- 動態背景輪播 --- */
         .background-slideshow { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; list-style: none; }
@@ -51,7 +64,7 @@
             100% { opacity: 0; }
         }
 
-        /* --- (新增) 側邊欄與漢堡選單 --- */
+        /* --- 側邊欄與漢堡選單 --- */
         .sidebar {
             position: fixed;
             top: 0;
@@ -107,7 +120,7 @@
             position: sticky; top: 0; z-index: 100; padding: 1rem 2rem; background: rgba(10, 10, 20, 0.5);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; 
-            gap: 1.5rem; /* (修改) 調整間距以容納新按鈕 */
+            gap: 1.5rem;
         }
         .logo { font-weight: 700; letter-spacing: 2px; text-shadow: 0 0 10px var(--primary-color); font-size: clamp(1.5rem, 5vw + 0.5rem, 1.8rem); }
 
@@ -150,6 +163,7 @@
         .card {
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; text-decoration: none; color: var(--text-color);
             transition: transform 0.3s ease, box-shadow 0.3s ease; backdrop-filter: blur(5px); display: flex; flex-direction: column;
+            cursor: pointer; /* 表示可點擊 */
         }
         .card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4); border-color: var(--primary-color); }
         .card:active { transform: translateY(-2px) scale(0.98); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); }
@@ -164,10 +178,178 @@
         .category-tag.desktop-game { background-color: #e53935; color: white; }
         .category-tag.app { background-color: #43a047; color: white; }
         
+        /* --- 模態視窗通用樣式 --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9); /* 半透明黑色背景 */
+            backdrop-filter: blur(5px); /* 背景模糊效果 */
+            -webkit-backdrop-filter: blur(5px);
+            display: none; /* 預設隱藏 */
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* 用於過渡效果 */
+            transition: opacity 0.3s ease;
+            pointer-events: none; /* 隱藏時不阻擋點擊 */
+        }
+        .modal-overlay.is-active {
+            opacity: 1;
+            pointer-events: auto; /* 顯示時允許點擊 */
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--modal-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid var(--modal-border);
+            box-shadow: 0 0 40px var(--primary-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-controls {
+            display: flex;
+            justify-content: flex-end; /* 按鈕靠右對齊 */
+            gap: 10px;
+            padding: 10px;
+            background: var(--control-bg);
+            height: 60px; /* 固定高度 */
+            flex-shrink: 0; /* 不會被壓縮 */
+            border-top: 1px solid var(--border-color);
+        }
+
+        .modal-control-btn {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-color);
+            background-color: rgba(0, 170, 255, 0.2);
+            border: 1px solid var(--primary-color);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+
+        .modal-control-btn:hover {
+            background-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .modal-control-btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        /* --- 遊戲內嵌模態視窗樣式 (覆寫通用樣式) --- */
+        #gameModal { z-index: 2000; }
+        #gameModal .modal-content {
+            width: 95%; /* 幾乎佔滿畫面的寬度 */
+            height: 95%; /* 幾乎佔滿畫面的高度 */
+        }
+        #gameIframe {
+            width: 100%;
+            height: calc(100% - 60px); /* 留出底部空間給控制按鈕 */
+            border: none;
+            background-color: #050510; /* 加載時的背景色 */
+        }
+
+        /* --- 設定模態視窗樣式 --- */
+        #settingsModal { z-index: 2001; } /* 比遊戲模態框高 */
+        #settingsModal .modal-content {
+            width: clamp(300px, 80%, 500px); /* 較小的設定框 */
+            height: auto; /* 內容自適應 */
+            padding: 1.5rem;
+            text-align: center;
+        }
+        #settingsModal h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+        }
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .setting-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .setting-item label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-color);
+            flex-grow: 1;
+            text-align: left;
+        }
+        /* 音量滑塊樣式 */
+        #volumeSlider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 60%; /* 滑塊寬度 */
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            border-radius: 4px;
+            transition: opacity .2s;
+            cursor: pointer;
+        }
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 170, 255, 0.8);
+        }
+        #volumeSlider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 170, 255, 0.8);
+        }
+        /* 音量圖示按鈕 */
+        .volume-icon-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: color 0.3s;
+        }
+        .volume-icon-btn:hover { color: white; }
+        .volume-icon-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            color: var(--text-muted);
+        }
+        #volumeSlider:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+
         /* --- MOBILE OPTIMIZATIONS (max-width: 768px) --- */
         @media (max-width: 768px) {
             header { padding: 1rem; }
-            .sidebar-toggle-btn { transform: scale(0.85); } /* (新增) 手機版按鈕稍小一點 */
+            .sidebar-toggle-btn { transform: scale(0.85); } /* 手機版按鈕稍小一點 */
             #toggle-filters-btn { display: flex; }
             .collapsible-menu {
                 flex-basis: 100%; flex-direction: column; overflow: hidden;
@@ -181,6 +363,15 @@
             .card-container { grid-template-columns: 1fr; gap: 1.5rem; }
             .card p { line-height: 1.7; }
             .scrolling-text { animation-duration: 40s; }
+            
+            /* 手機版模態框調整 */
+            #gameModal .modal-content {
+                width: 98%;
+                height: 98%;
+            }
+            #settingsModal .modal-content {
+                width: 95%;
+            }
         }
         
         /* --- Desktop-specific layout (min-width: 769px) --- */
@@ -197,14 +388,15 @@
 </head>
 <body>
 
-    <!-- (新增) 側邊欄與遮罩層 -->
+    <!-- 背景音樂播放器 (預設靜音) -->
+    <audio id="backgroundMusic" loop muted></audio>
+
+    <!-- 側邊欄與遮罩層 -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <nav id="sidebar" class="sidebar">
         <ul>
             <li><a href="#" class="active">主頁</a></li>
-            <!-- 未來可以新增更多連結 -->
-            <!-- <li><a href="#">關於我們</a></li> -->
-            <!-- <li><a href="#">聯絡方式</a></li> -->
+            <li><a href="#" id="settingsLink">設定</a></li> <!-- 新增設定連結 -->
         </ul>
     </nav>
 
@@ -214,7 +406,7 @@
     </ul>
 
     <header>
-        <!-- (新增) 漢堡選單按鈕 -->
+        <!-- 漢堡選單按鈕 -->
         <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Toggle Menu" aria-expanded="false">
             <span class="line line1"></span>
             <span class="line line2"></span>
@@ -249,10 +441,74 @@
         </div>
     </main>
 
+    <!-- 遊戲內嵌模態視窗 -->
+    <div id="gameModal" class="modal-overlay">
+        <div class="modal-content">
+            <iframe id="gameIframe" src="" frameborder="0" allowfullscreen></iframe>
+            <div class="modal-controls">
+                <button id="openInNewTabBtn" class="modal-control-btn">在新分頁開啟</button>
+                <button id="closeGameModalBtn" class="modal-control-btn">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定模態視窗 -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>設定</h3>
+            <div class="setting-item">
+                <label for="volumeSlider">背景音樂音量</label>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0">
+                <button id="muteToggleBtn" class="volume-icon-btn" aria-label="Toggle Mute">
+                    <span class="mute-icon">🔇</span> <!-- 靜音圖示 -->
+                </button>
+            </div>
+            <div class="modal-controls" style="border-top: none; padding-top: 0; justify-content: center;">
+                <button id="closeSettingsModalBtn" class="modal-control-btn">關閉</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-        // --- (新增) 側邊欄控制 ---
+        // --- 全局模態框控制 ---
+        // 函數：顯示模態框
+        function showModal(modalElement) {
+            modalElement.style.display = 'flex';
+            requestAnimationFrame(() => {
+                modalElement.classList.add('is-active');
+                document.body.classList.add('modal-open'); // 阻止主頁面滾動
+            });
+        }
+
+        // 函數：隱藏模態框
+        function hideModal(modalElement) {
+            modalElement.classList.remove('is-active');
+            document.body.classList.remove('modal-open'); // 恢復主頁面滾動
+            setTimeout(() => {
+                modalElement.style.display = 'none';
+            }, 300); // 這裡的數字應該與 CSS 的 transition-duration 匹配
+        }
+
+        // 監聽所有模態框的背景點擊和 Escape 鍵
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (event) => {
+                if (event.target === overlay) {
+                    hideModal(overlay);
+                }
+            });
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.is-active').forEach(modal => {
+                    hideModal(modal);
+                });
+            }
+        });
+
+
+        // --- 側邊欄控制 ---
         const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -268,6 +524,221 @@
         // --- 側邊欄控制結束 ---
 
 
+        // --- 遊戲內嵌模態視窗控制 ---
+        const gameModal = document.getElementById('gameModal');
+        const gameIframe = document.getElementById('gameIframe');
+        const closeGameModalBtn = document.getElementById('closeGameModalBtn');
+        const openInNewTabBtn = document.getElementById('openInNewTabBtn');
+
+        function showGameModal(url) {
+            gameIframe.src = url; // 設定 iframe 的 src
+            // 設定「在新分頁開啟」按鈕的點擊行為
+            openInNewTabBtn.onclick = () => window.open(url, '_blank'); 
+            showModal(gameModal);
+        }
+
+        function hideGameModal() {
+            hideModal(gameModal);
+            gameIframe.src = ''; // 清除 iframe 內容，停止音訊/視訊播放
+        }
+
+        closeGameModalBtn.addEventListener('click', hideGameModal);
+
+
+        // --- 設定模態視窗控制 ---
+        const settingsLink = document.getElementById('settingsLink');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const muteToggleBtn = document.getElementById('muteToggleBtn');
+        const muteIcon = muteToggleBtn.querySelector('.mute-icon');
+
+        // 請在此處填寫您的 MP3 檔案路徑 (已增加到 10 個範例)
+        const audioPlaylist = [
+            'images/music1.mp3', 
+            'images/music2.mp3', 
+            'images/music3.mp3',
+            'images/music4.mp3',
+            'images/music5.mp3',
+            'images/music6.mp3', // 新增
+            'images/music7.mp3', // 新增
+            'images/music8.mp3', // 新增
+            'images/music9.mp3', // 新增
+            'images/music10.mp3' // 新增
+        ];
+        let currentAudioIndex = 0;
+        let failedAttemptsCount = 0; // 新增：追蹤連續失敗的次數
+
+        function updateMuteIcon() {
+            if (backgroundMusic.muted || backgroundMusic.volume === 0) {
+                muteIcon.textContent = '🔇'; // 靜音圖示
+                muteToggleBtn.setAttribute('aria-label', 'Unmute');
+            } else {
+                muteIcon.textContent = '🔊'; // 有聲音圖示
+                muteToggleBtn.setAttribute('aria-label', 'Mute');
+            }
+        }
+
+        function playNextAudio() {
+            if (audioPlaylist.length === 0) {
+                console.warn("音頻播放列表為空，無法播放音樂。");
+                return;
+            }
+
+            // 如果所有歌曲都嘗試過且都失敗，則停止
+            if (failedAttemptsCount >= audioPlaylist.length) {
+                console.warn("所有音頻檔案都無法載入或播放，已停止嘗試。");
+                backgroundMusic.pause(); // 停止播放
+                backgroundMusic.src = ''; // 清除 src，防止進一步錯誤
+                volumeSlider.disabled = true; // 禁用音量滑塊
+                muteToggleBtn.disabled = true; // 禁用靜音按鈕
+                updateMuteIcon(); // 更新圖示為靜音且無法操作狀態
+                return;
+            }
+            
+            // 嘗試載入並播放當前曲目
+            backgroundMusic.src = audioPlaylist[currentAudioIndex];
+            backgroundMusic.load(); // 確保新 src 被載入
+
+            const playPromise = backgroundMusic.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        // 音樂已成功播放 (或已在播放中)
+                        console.log(`正在播放: ${audioPlaylist[currentAudioIndex]}`);
+                        failedAttemptsCount = 0; // 成功播放，重置失敗計數
+                        // 確保音量控制是啟用的
+                        volumeSlider.disabled = false; 
+                        muteToggleBtn.disabled = false;
+                        updateMuteIcon();
+                    })
+                    .catch(error => {
+                        // 自動播放被阻止或載入失敗
+                        console.warn(`自動播放或載入失敗 (${audioPlaylist[currentAudioIndex]}):`, error);
+                        failedAttemptsCount++; // 增加失敗計數
+                        currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
+                        playNextAudio(); // 遞歸調用，嘗試下一首
+                    });
+            }
+        }
+
+        // 監聽音頻載入失敗事件 (例如檔案不存在或損壞)
+        backgroundMusic.addEventListener('error', (e) => {
+            console.error(`載入音頻檔案失敗: ${backgroundMusic.src}. Error code: ${e.target.error.code}. 跳過此曲。`);
+            failedAttemptsCount++; // 增加失敗計數
+            currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
+            playNextAudio(); // 嘗試播放下一首
+        });
+
+        function initializeAudioControls() {
+            if (audioPlaylist.length > 0) {
+                // 從 localStorage 載入保存的音量和靜音狀態，如果沒有，則預設靜音且音量為0
+                const savedVolume = parseFloat(localStorage.getItem('backgroundVolume'));
+                const savedMuted = localStorage.getItem('backgroundMuted') === 'true';
+
+                backgroundMusic.volume = isNaN(savedVolume) ? 0 : savedVolume; // 如果未保存或無效，預設音量為0
+                backgroundMusic.muted = savedMuted || true; // 如果未保存，預設靜音
+
+                volumeSlider.value = backgroundMusic.volume;
+                volumeSlider.disabled = backgroundMusic.muted; // 如果靜音，滑塊禁用
+                
+                // 初次設定按鈕狀態，避免在音樂無法播放時錯誤顯示
+                if (audioPlaylist.length === 0) { // 如果一開始就沒有音樂
+                    volumeSlider.disabled = true;
+                    muteToggleBtn.disabled = true;
+                } else {
+                    // 如果有音樂，但預設靜音，滑塊可以動但設為0
+                    volumeSlider.disabled = false; 
+                    muteToggleBtn.disabled = false;
+                    if (backgroundMusic.muted) {
+                         volumeSlider.value = 0; // 靜音時滑塊顯示為0
+                    }
+                }
+
+                updateMuteIcon(); // 更新圖示
+                
+                playNextAudio(); // 開始播放第一首
+
+                // 監聽音樂播放結束，切換下一首
+                backgroundMusic.addEventListener('ended', () => {
+                    currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
+                    playNextAudio();
+                });
+            } else {
+                console.warn("未找到背景音樂檔案。請檢查 audioPlaylist 陣列和檔案路徑。");
+                volumeSlider.disabled = true;
+                muteToggleBtn.disabled = true;
+            }
+
+            // 音量滑塊控制
+            volumeSlider.addEventListener('input', () => {
+                backgroundMusic.volume = volumeSlider.value;
+                backgroundMusic.muted = (volumeSlider.value == 0); // 滑到0自動靜音
+                localStorage.setItem('backgroundVolume', backgroundMusic.volume);
+                localStorage.setItem('backgroundMuted', backgroundMusic.muted);
+                updateMuteIcon();
+                // 如果是從靜音狀態解除，且音樂被瀏覽器阻止，嘗試播放
+                if (!backgroundMusic.muted && backgroundMusic.paused) {
+                    backgroundMusic.play().catch(error => {
+                        console.warn("無法自動播放背景音樂，可能需要用戶再次互動。", error);
+                    });
+                }
+            });
+
+            // 靜音開關按鈕
+            muteToggleBtn.addEventListener('click', () => {
+                backgroundMusic.muted = !backgroundMusic.muted;
+                if (!backgroundMusic.muted && backgroundMusic.volume === 0) {
+                    backgroundMusic.volume = 0.5; // 如果從靜音恢復，音量設為0.5
+                    volumeSlider.value = 0.5;
+                } else if (backgroundMusic.muted) {
+                    // 如果靜音，將音量滑塊也歸零，但實際音量不變，因為 muted 屬性優先
+                    volumeSlider.value = 0; 
+                }
+                localStorage.setItem('backgroundMuted', backgroundMusic.muted);
+                localStorage.setItem('backgroundVolume', backgroundMusic.volume); // 靜音時也更新音量，確保下次讀取正確
+                updateMuteIcon();
+                // 嘗試播放，以防之前被阻止
+                if (!backgroundMusic.muted && backgroundMusic.paused) {
+                    backgroundMusic.play().catch(error => {
+                        console.warn("無法自動播放背景音樂，可能需要用戶再次互動。", error);
+                    });
+                }
+            });
+        }
+        
+        function showSettingsModal() {
+            showModal(settingsModal);
+            // 確保設定模態框打開時，音量滑塊和靜音狀態同步
+            volumeSlider.value = backgroundMusic.volume;
+            // 如果音樂是靜音的，將滑塊移到0
+            if (backgroundMusic.muted) {
+                volumeSlider.value = 0;
+            }
+            // 確保音量滑塊和靜音按鈕的禁用狀態正確
+            if (audioPlaylist.length === 0 || failedAttemptsCount >= audioPlaylist.length) {
+                volumeSlider.disabled = true;
+                muteToggleBtn.disabled = true;
+            } else {
+                volumeSlider.disabled = false;
+                muteToggleBtn.disabled = false;
+            }
+            updateMuteIcon(); // 重新檢查靜音圖示
+        }
+
+        settingsLink.addEventListener('click', (event) => {
+            event.preventDefault(); // 阻止連結默認跳轉
+            showSettingsModal();
+            // 關閉側邊欄，讓設定模態框更清晰
+            if (document.body.classList.contains('sidebar-open')) {
+                toggleSidebar();
+            }
+        });
+        closeSettingsModalBtn.addEventListener('click', () => hideModal(settingsModal));
+
+
+        // --- 項目資料與渲染 ---
         const projects = [
             { title: '睡夢遊戲', url: 'https://gabriel-0927.github.io/sleeping/sleep.html', description: '一款探索夢境與現實的奇幻遊戲，在睡夢中解開謎題，尋找真相。', localImage: 'images/sleeping-game.jpg', fallbackImage: 'https://images.pexels.com/photos/1624496/pexels-photo-1624496.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '貓咪大亂鬥', url: 'https://gabriel-0927.github.io/Cat-brawl/', description: '集結你的貓咪軍團！充滿策略與趣味的塔防對戰遊戲，萌貓出擊，無人能敵。', localImage: 'images/cat-brawl.jpg', fallbackImage: 'https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
@@ -277,12 +748,10 @@
             { title: '收集星星', url: 'https://rex971008.github.io/starcollect/starcollect.html', description: '在限定時間內收集所有閃爍的星星，挑戰你的反應速度和操作技巧。', localImage: 'images/star-collect.jpg', fallbackImage: 'https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '賽車起跑', url: 'https://rex971008.github.io/racingstart/racing%20start.html', description: '屏住呼吸，在信號燈熄滅的瞬間完美起跑！考驗你極限反應的賽車遊戲。', localImage: 'images/racing-start.jpg', fallbackImage: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: '胡鬧貓廚房', url: 'https://rex971008.github.io/kitchen_katterwaul/kitchen_katterwaul.html', description: '與朋友合作或對抗，在混亂的廚房中完成訂單！考驗你們的默契與反應。', localImage: 'images/kitchen-katterwaul.jpg', fallbackImage: 'https://images.pexels.com/photos/887827/pexels-photo-887827.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
-            // NEW: Added AI Drawing Game
             { title: '你畫我猜', url: 'https://gabriel-0927.github.io/draw/draw.html', description: '免下載，直接開玩。一人畫圖，大家猜詞，考驗你的繪畫功力與猜謎速度！快揪朋友比畫、比猜！', localImage: 'images/ai-drawing.jpg', fallbackImage: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['手遊', '桌機遊戲'] },
             { title: 'ChromaShock Arena', url: 'https://rex971008.github.io/ChromaShockArena/', description: '進入色彩斑斕的競技場，體驗快節奏的射擊對決。精準的槍法和靈活的走位是致勝關鍵。', localImage: 'images/chromashock-arena.jpg', fallbackImage: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=1470', category: ['桌機遊戲'] },
             { title: 'TOUR EATS', url: 'https://rex971008.github.io/tour_eats_v1.1/code.html', description: '結合旅遊與美食的探索應用。發現你所在地的特色餐廳，規劃一場完美的味蕾之旅。', localImage: 'images/tour-eats.jpg', fallbackImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1374', category: ['應用'] },
             { title: '單字卡', url: 'https://rex971008.github.io/flashcard/flashcard.html', description: '一個簡潔有效的單字卡應用，幫助您學習和記憶新詞彙，讓複習事半功倍。', localImage: 'images/flashcard.jpg', fallbackImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1470', category: ['應用'] },
-            // NEW: Added Photo Booth App
             { title: '拍貼機', url: 'https://stellar-muffin-de6334.netlify.app/', description: '選擇喜歡的相框，製作屬於你的個性化拍貼照片，留下美好回憶。', localImage: 'images/photo-booth.jpg', fallbackImage: 'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['應用'] },
             { title: '官方網站 (v2.4.7)', url: 'https://sage-stardust-00287b.netlify.app/', description: '團隊或個人的官方門戶，展示核心理念、最新動態與所有專案的集合地。全新的客服系統與閱歷點餐系統將會於未來實際運用。建議創建帳號並且允許通知。', localImage: 'images/official-website.jpg', fallbackImage: 'https://images.pexels.com/photos/326503/pexels-photo-326503.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', category: ['應用'] }
         ];
@@ -308,6 +777,7 @@
 
         function handleOutsideInteraction(event) {
             if (!collapsibleMenu.classList.contains('is-open')) return;
+            // 檢查點擊是否在篩選菜單或觸發按鈕內部
             if (toggleBtn.contains(event.target) || collapsibleMenu.contains(event.target)) return;
             updateMenuState(false);
         }
@@ -334,12 +804,12 @@
             projectsToRender.forEach(project => {
                 const tagsHTML = project.category.map(cat => `<span class="category-tag ${categoryClassMap[cat] || ''}">${cat}</span>`).join('');
                 cardContainer.innerHTML += `
-                    <a href="${project.url}" target="_blank" class="card">
+                    <div class="card" data-game-url="${project.url}"> <!-- 修改為 div 並添加 data-game-url -->
                         <div class="card-image" style="background-image: url('${project.finalImage}')"></div>
                         <div class="card-content"><h3>${project.title}</h3><p>${project.description}</p>
                             <div class="card-footer"><div class="tags-container">${tagsHTML}</div></div>
                         </div>
-                    </a>`;
+                    </div>`;
             });
         }
 
@@ -356,7 +826,18 @@
             const imageChecks = projects.map(p => checkImage(p.localImage, p.fallbackImage));
             const finalImagePaths = await Promise.all(imageChecks);
             processedProjects = projects.map((project, index) => ({ ...project, finalImage: finalImagePaths[index] }));
-            filterAndSearch();
+            
+            filterAndSearch(); // 初始渲染卡片
+
+            // 為卡片容器添加事件委託，監聽點擊事件
+            cardContainer.addEventListener('click', (event) => {
+                const card = event.target.closest('.card'); // 找到被點擊的卡片元素
+                if (card && card.dataset.gameUrl) { // 確保點擊的是卡片且有 URL
+                    event.preventDefault(); // 阻止任何可能的默認行為 (雖然現在是 div 但習慣性加上)
+                    showGameModal(card.dataset.gameUrl); // 顯示模態框並載入遊戲
+                }
+            });
+
             searchBox.addEventListener('input', filterAndSearch);
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
@@ -365,6 +846,9 @@
                     filterAndSearch();
                 });
             });
+
+            // 初始化背景音樂控制器
+            initializeAudioControls();
         }
 
         initializePage();
