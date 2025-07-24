@@ -430,8 +430,8 @@
     
     <div class="scrolling-recommendations">
         <div class="scrolling-text">
-             <span>🔥 熱門推薦：貓咪大亂鬥</span><span>✨ 最新上線：單字卡</span><span>🎮 經典必玩：黃金礦工</span>
-             <span>🌲 冒險探索：叢林求生</span><span>🚀 桌機專屬：ChromaShock Arena</span>
+             <span>‼️遊玩必知‼️：預覽畫面資料不會同步，“開啟新分頁”後才會正確導入之前資料！</span><span>✨ 最新上線：官網（v2.4.7）</span><span>🎮 經典必玩：黃金礦工</span>
+             <span>🌲 冒險探索：叢林求生</span><span>🚀 炫彩射擊：ChromaShock Arena</span><span>🔥 熱門推薦：貓咪大亂鬥</span>
         </div>
     </div>
 
@@ -561,14 +561,34 @@
             'images/music3.mp3',
             'images/music4.mp3',
             'images/music5.mp3',
-            'images/music6.mp3', // 新增
-            'images/music7.mp3', // 新增
-            'images/music8.mp3', // 新增
-            'images/music9.mp3', // 新增
-            'images/music10.mp3' // 新增
+            'images/music6.mp3', 
+            'images/music7.mp3', 
+            'images/music8.mp3', 
+            'images/music9.mp3', 
+            'images/music10.mp3' 
         ];
         let currentAudioIndex = 0;
-        let failedAttemptsCount = 0; // 新增：追蹤連續失敗的次數
+        let failedAttemptsCount = 0; // 追蹤連續失敗的次數
+
+        // 輔助函數：禁用音量控制
+        function disableAudioControls() {
+            backgroundMusic.pause(); // 停止播放
+            backgroundMusic.src = ''; // 清除 src，防止進一步錯誤
+            volumeSlider.disabled = true; // 禁用音量滑塊
+            muteToggleBtn.disabled = true; // 禁用靜音按鈕
+            muteIcon.textContent = '🔇'; // 確保圖示反映靜音/禁用狀態
+            muteToggleBtn.setAttribute('aria-label', 'Audio disabled');
+            localStorage.setItem('audioControlsDisabled', 'true'); // 保存狀態到 localStorage
+            console.log("所有音頻檔案都無法載入或播放，已禁用音樂控制。");
+        }
+
+        // 輔助函數：啟用音量控制
+        function enableAudioControls() {
+            volumeSlider.disabled = false;
+            muteToggleBtn.disabled = false;
+            localStorage.setItem('audioControlsDisabled', 'false'); // 從 localStorage 移除禁用狀態
+            updateMuteIcon(); // 更新圖示基於當前靜音/音量狀態
+        }
 
         function updateMuteIcon() {
             if (backgroundMusic.muted || backgroundMusic.volume === 0) {
@@ -583,17 +603,13 @@
         function playNextAudio() {
             if (audioPlaylist.length === 0) {
                 console.warn("音頻播放列表為空，無法播放音樂。");
+                disableAudioControls();
                 return;
             }
 
             // 如果所有歌曲都嘗試過且都失敗，則停止
             if (failedAttemptsCount >= audioPlaylist.length) {
-                console.warn("所有音頻檔案都無法載入或播放，已停止嘗試。");
-                backgroundMusic.pause(); // 停止播放
-                backgroundMusic.src = ''; // 清除 src，防止進一步錯誤
-                volumeSlider.disabled = true; // 禁用音量滑塊
-                muteToggleBtn.disabled = true; // 禁用靜音按鈕
-                updateMuteIcon(); // 更新圖示為靜音且無法操作狀態
+                disableAudioControls();
                 return;
             }
             
@@ -608,10 +624,7 @@
                         // 音樂已成功播放 (或已在播放中)
                         console.log(`正在播放: ${audioPlaylist[currentAudioIndex]}`);
                         failedAttemptsCount = 0; // 成功播放，重置失敗計數
-                        // 確保音量控制是啟用的
-                        volumeSlider.disabled = false; 
-                        muteToggleBtn.disabled = false;
-                        updateMuteIcon();
+                        enableAudioControls(); // 確保音量控制是啟用的
                     })
                     .catch(error => {
                         // 自動播放被阻止或載入失敗
@@ -632,44 +645,42 @@
         });
 
         function initializeAudioControls() {
-            if (audioPlaylist.length > 0) {
-                // 從 localStorage 載入保存的音量和靜音狀態，如果沒有，則預設靜音且音量為0
-                const savedVolume = parseFloat(localStorage.getItem('backgroundVolume'));
-                const savedMuted = localStorage.getItem('backgroundMuted') === 'true';
-
-                backgroundMusic.volume = isNaN(savedVolume) ? 0 : savedVolume; // 如果未保存或無效，預設音量為0
-                backgroundMusic.muted = savedMuted || true; // 如果未保存，預設靜音
-
-                volumeSlider.value = backgroundMusic.volume;
-                volumeSlider.disabled = backgroundMusic.muted; // 如果靜音，滑塊禁用
-                
-                // 初次設定按鈕狀態，避免在音樂無法播放時錯誤顯示
-                if (audioPlaylist.length === 0) { // 如果一開始就沒有音樂
-                    volumeSlider.disabled = true;
-                    muteToggleBtn.disabled = true;
-                } else {
-                    // 如果有音樂，但預設靜音，滑塊可以動但設為0
-                    volumeSlider.disabled = false; 
-                    muteToggleBtn.disabled = false;
-                    if (backgroundMusic.muted) {
-                         volumeSlider.value = 0; // 靜音時滑塊顯示為0
-                    }
-                }
-
-                updateMuteIcon(); // 更新圖示
-                
-                playNextAudio(); // 開始播放第一首
-
-                // 監聽音樂播放結束，切換下一首
-                backgroundMusic.addEventListener('ended', () => {
-                    currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
-                    playNextAudio();
-                });
-            } else {
-                console.warn("未找到背景音樂檔案。請檢查 audioPlaylist 陣列和檔案路徑。");
-                volumeSlider.disabled = true;
-                muteToggleBtn.disabled = true;
+            if (audioPlaylist.length === 0) {
+                disableAudioControls();
+                return;
             }
+
+            // 檢查是否從 localStorage 讀取到音樂已禁用的狀態
+            const audioDisabledPermanently = localStorage.getItem('audioControlsDisabled') === 'true';
+
+            if (audioDisabledPermanently) {
+                disableAudioControls(); // 如果之前所有音樂都失敗了，就保持禁用
+                return;
+            }
+
+            // 從 localStorage 載入保存的音量和靜音狀態，如果沒有，則預設靜音且音量為0
+            const savedVolume = parseFloat(localStorage.getItem('backgroundVolume'));
+            const savedMuted = localStorage.getItem('backgroundMuted') === 'true';
+
+            backgroundMusic.volume = isNaN(savedVolume) ? 0 : savedVolume; // 如果未保存或無效，預設音量為0
+            backgroundMusic.muted = savedMuted || true; // 如果未保存，預設靜音
+
+            volumeSlider.value = backgroundMusic.volume;
+            
+            // 初始設定按鈕狀態，會被 playNextAudio 的結果覆寫
+            enableAudioControls();
+            if (backgroundMusic.muted) {
+                 volumeSlider.value = 0; // 靜音時滑塊顯示為0
+            }
+            updateMuteIcon(); // 更新圖示
+            
+            playNextAudio(); // 開始播放第一首
+
+            // 監聽音樂播放結束，切換下一首
+            backgroundMusic.addEventListener('ended', () => {
+                currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
+                playNextAudio();
+            });
 
             // 音量滑塊控制
             volumeSlider.addEventListener('input', () => {
@@ -717,7 +728,7 @@
                 volumeSlider.value = 0;
             }
             // 確保音量滑塊和靜音按鈕的禁用狀態正確
-            if (audioPlaylist.length === 0 || failedAttemptsCount >= audioPlaylist.length) {
+            if (localStorage.getItem('audioControlsDisabled') === 'true') {
                 volumeSlider.disabled = true;
                 muteToggleBtn.disabled = true;
             } else {
@@ -733,6 +744,16 @@
             // 關閉側邊欄，讓設定模態框更清晰
             if (document.body.classList.contains('sidebar-open')) {
                 toggleSidebar();
+            }
+
+            // **新邏輯：如果音樂沒有正在播放或之前已禁用，則重新搜索**
+            const audioDisabledPermanently = localStorage.getItem('audioControlsDisabled') === 'true';
+            if (backgroundMusic.paused || backgroundMusic.src === '' || audioDisabledPermanently) {
+                console.log("偵測到音樂未播放或上次嘗試失敗/永久禁用，重新搜索音樂。");
+                failedAttemptsCount = 0; // 重置失敗計數
+                currentAudioIndex = 0; // 從第一首歌曲開始嘗試
+                enableAudioControls(); // 重新啟用控制（在嘗試播放之前）
+                playNextAudio(); // 開始播放嘗試
             }
         });
         closeSettingsModalBtn.addEventListener('click', () => hideModal(settingsModal));
