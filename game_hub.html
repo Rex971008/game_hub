@@ -462,7 +462,7 @@
 <body>
 
     <!-- 背景音樂播放器 (預設靜音) -->
-    <audio id="backgroundMusic" loop muted></audio>
+    <audio id="backgroundMusic" preload="auto" muted></audio>
 
     <!-- 側邊欄與遮罩層 -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
@@ -564,7 +564,7 @@
 
         function hideModal(modalElement) {
             modalElement.classList.remove('is-active');
-            // Only remove modal-open if no other modal is active
+            // 只有當沒有其他模態框活躍時，才移除 body 的 modal-open 類
             setTimeout(() => {
                 modalElement.style.display = 'none';
                 if (!document.querySelector('.modal-overlay.is-active')) {
@@ -639,43 +639,46 @@
         const singleLoopToggleBtn = document.getElementById('singleLoopToggleBtn'); // 新增單曲循環按鈕
         const songListElement = document.getElementById('songList'); // 新增歌曲列表元素
 
-        // 請在此處填寫您的 MP3 檔案路徑與名稱
+        // 請在此處填寫您的 MP3 檔案路徑與名稱 (已增加到 10 個範例)
         const audioPlaylist = [
             { path: 'images/music1.mp3', name: '輕快背景樂' }, 
             { path: 'images/music2.mp3', name: '史詩戰鬥曲' }, 
             { path: 'images/music3.mp3', name: '奇幻冒險旋律' },
             { path: 'images/music4.mp3', name: '寧靜夜晚' },
             { path: 'images/music5.mp3', name: '歡樂遊戲時間' },
-            { path: 'images/music6.mp3', name: '未來科技感' },
-            { path: 'images/music7.mp3', name: '神秘地牢' },
-            { path: 'images/music8.mp3', name: '復古像素風' },
-            { path: 'images/music9.mp3', name: '高能節奏' },
-            { path: 'images/music10.mp3', name: '勝利凱歌' }
+            { path: 'images/music6.mp3', name: '未來科技感' }, 
+            { path: 'images/music7.mp3', name: '神秘地牢' }, 
+            { path: 'images/music8.mp3', name: '復古像素風' }, 
+            { path: 'images/music9.mp3', name: '高能節奏' }, 
+            { path: 'images/music10.mp3', name: '勝利凱歌' } 
         ];
-        let currentAudioIndex = 0;
-        let failedAttemptsCount = 0; // 追蹤連續失敗的次數
+        let currentAudioIndex = 0; // 當前播放歌曲的索引
+        let failedAttemptsCount = 0; // 追蹤連續載入或播放失敗的次數
         let isSingleLoop = false; // 控制單曲循環狀態
+        let audioScanComplete = false; // 標記是否已掃描過所有音樂以確定可用性
 
         // 輔助函數：禁用音量控制
         function disableAudioControls() {
             backgroundMusic.pause();
-            backgroundMusic.src = '';
+            backgroundMusic.src = ''; // 清空 src，防止繼續嘗試載入錯誤的音源
             volumeSlider.disabled = true;
             muteToggleBtn.disabled = true;
-            singleLoopToggleBtn.disabled = true; // 禁用單曲循環按鈕
+            singleLoopToggleBtn.disabled = true;
             muteIcon.textContent = '🔇';
             muteToggleBtn.setAttribute('aria-label', 'Audio disabled');
             localStorage.setItem('audioControlsDisabled', 'true');
             console.log("所有音頻檔案都無法載入或播放，已禁用音樂控制。");
+            updateSongListUI(); // 更新歌曲列表 UI (如果打開了設定頁)
         }
 
         // 輔助函數：啟用音量控制
         function enableAudioControls() {
             volumeSlider.disabled = false;
             muteToggleBtn.disabled = false;
-            singleLoopToggleBtn.disabled = false; // 啟用單曲循環按鈕
+            singleLoopToggleBtn.disabled = false;
             localStorage.setItem('audioControlsDisabled', 'false');
             updateMuteIcon();
+            updateSongListUI(); // 更新歌曲列表 UI (如果打開了設定頁)
         }
 
         function updateMuteIcon() {
@@ -697,9 +700,9 @@
 
             // 確保索引在有效範圍內
             index = index % audioPlaylist.length;
-            if (index < 0) index = audioPlaylist.length + index; // 處理負數索引 (儘管這裡不會發生)
+            if (index < 0) index = audioPlaylist.length + index; // 處理負數索引
 
-            // 如果所有歌曲都嘗試過且都失敗，則停止 (除非是強制播放)
+            // 如果所有歌曲都嘗試過且都失敗，則停止 (除非是強制播放，如用戶手動點擊)
             if (failedAttemptsCount >= audioPlaylist.length && !forcePlay) {
                 disableAudioControls();
                 return;
@@ -707,9 +710,11 @@
 
             currentAudioIndex = index;
             backgroundMusic.src = audioPlaylist[currentAudioIndex].path;
-            backgroundMusic.load(); // 確保新 src 被載入
+            backgroundMusic.load(); // 確保新 src 被載入 (觸發 canplaythrough 或 error)
 
-            backgroundMusic.loop = isSingleLoop; // 套用單曲循環設定
+            // backgroundMusic.loop 會在 singleLoopToggleBtn 的點擊事件中更新
+            // 但這裡我們需要根據 isSingleLoop 的當前狀態來設定
+            backgroundMusic.loop = isSingleLoop; 
 
             const playPromise = backgroundMusic.play();
             if (playPromise !== undefined) {
@@ -721,19 +726,26 @@
                         updateSongListUI(); // 更新歌曲列表 UI
                     })
                     .catch(error => {
-                        console.warn(`自動播放或載入失敗 (${audioPlaylist[currentAudioIndex].name}):`, error);
-                        failedAttemptsCount++; // 增加失敗計數
+                        console.warn(`自動播放或載入失敗 (${audioPlaylist[currentAudioIndex].name}):`, error.name, error);
                         
-                        // 如果這次播放失敗了，並且不是單曲循環模式，或者即使是單曲循環但來源檔案都載入失敗了，才嘗試播放下一首
-                        // 如果是單曲循環且文件存在但只是自動播放被阻止，我們不應該跳到下一首，而是等待用戶互動
-                        if (!isSingleLoop || error.name === 'MediaError' || backgroundMusic.networkState === HTMLMediaElement.NETWORK_EMPTY) {
-                             currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
-                             playAudioByIndex(currentAudioIndex); // 遞歸調用，嘗試下一首
-                        } else {
-                            // 如果是單曲循環模式，且不是文件載入錯誤，則停止並等待用戶互動
+                        // 處理瀏覽器阻止自動播放的情況 (NotAllowedError)
+                        if (error.name === 'NotAllowedError') {
+                            console.info('瀏覽器阻止自動播放。請用戶手動互動以啟用音頻。');
                             backgroundMusic.pause();
-                            updateSongListUI(); // 依然更新 UI 狀態
+                            backgroundMusic.muted = true; // 強制靜音，讓自動播放政策滿意
+                            volumeSlider.value = 0; // UI上顯示為靜音
+                            updateMuteIcon();
+                            // 此類錯誤不應計入 failedAttemptsCount，因為文件本身是有效的
+                            // 也不應自動跳到下一首，因為用戶互動後這首應該能播放
+                            // 因此這裡直接返回，等待用戶手動解禁
+                            updateSongListUI(); // 更新列表狀態 (可能顯示暫停圖示)
+                            return; 
                         }
+
+                        // 對於其他載入或解碼錯誤 (NetworkError, MediaError等)，才計入失敗並嘗試下一首
+                        failedAttemptsCount++; 
+                        currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
+                        playAudioByIndex(currentAudioIndex); // 遞歸調用，嘗試下一首
                     });
             }
         }
@@ -741,21 +753,22 @@
         // 監聽音頻載入失敗事件 (例如檔案不存在或損壞)
         backgroundMusic.addEventListener('error', (e) => {
             console.error(`載入音頻檔案失敗: ${backgroundMusic.src}. Error code: ${e.target.error.code}. 跳過此曲。`);
-            failedAttemptsCount++; // 增加失敗計數
+            failedAttemptsCount++;
             currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
             playAudioByIndex(currentAudioIndex); // 嘗試播放下一首
         });
 
         // 當前歌曲播放結束時，自動播放下一首 (僅在非單曲循環模式下)
         backgroundMusic.addEventListener('ended', () => {
-            // 這個事件只在 backgroundMusic.loop 為 false 時觸發
-            // 如果 isSingleLoop 為 true，backgroundMusic.loop 會是 true，導致此事件不觸發，由瀏覽器自行循環
+            // 這個事件只在 backgroundMusic.loop 為 false 時觸發。
+            // 如果 isSingleLoop 為 true，backgroundMusic.loop 會是 true，導致此事件不觸發，由瀏覽器自行循環。
             if (!isSingleLoop) { 
                 currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
                 playAudioByIndex(currentAudioIndex);
             }
         });
-
+        
+        // 初始化音頻控制器的狀態和事件
         function initializeAudioControls() {
             if (audioPlaylist.length === 0) {
                 disableAudioControls();
@@ -831,12 +844,15 @@
                 singleLoopToggleBtn.classList.toggle('active', isSingleLoop);
                 localStorage.setItem('isSingleLoop', isSingleLoop); // 保存狀態
                 
-                // 如果取消單曲循環，且音樂因為循環結束而暫停了（如果之前是手動播放或因錯誤暫停）
-                // 則嘗試播放下一首 (僅當前音頻源已設置且已暫停時)
+                // 如果取消單曲循環，且音樂因為循環結束而暫停了（這通常不會發生因為loop是true）
+                // 只有當音樂被手動暫停或因為autoplay policy暫停時，才需要考慮繼續播放
                 if (!isSingleLoop && backgroundMusic.paused && backgroundMusic.src) {
-                    // 如果 backgroundMusic.loop 之前是 true，ended事件不會觸發，所以這裡手動觸發下一首
-                    currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
-                    playAudioByIndex(currentAudioIndex);
+                    // 檢查音樂是否因為文件本身問題而暫停 (如果 src 是有效的，則嘗試播放)
+                    if (backgroundMusic.networkState === HTMLMediaElement.NETWORK_IDLE || backgroundMusic.networkState === HTMLMediaElement.NETWORK_LOADED) {
+                        backgroundMusic.play().catch(error => {
+                             console.warn("取消單曲循環後，嘗試播放音樂時被阻止。", error);
+                        });
+                    }
                 }
             });
 
@@ -847,13 +863,19 @@
                     const index = parseInt(clickedItem.dataset.index, 10);
                     if (!isNaN(index) && index >= 0 && index < audioPlaylist.length) {
                         playAudioByIndex(index, true); // 強制播放，用戶選擇優先
-                        hideModal(settingsModal); // 播放後關閉設定頁
+                        // 移除 hideModal(settingsModal); 讓設定頁保持開啟
                     }
                 }
             });
+
+            // 監聽播放狀態變化以更新 UI
+            backgroundMusic.addEventListener('play', updateSongListUI);
+            backgroundMusic.addEventListener('pause', updateSongListUI);
+            backgroundMusic.addEventListener('ended', updateSongListUI);
+            backgroundMusic.addEventListener('volumechange', updateMuteIcon); // 針對音量變化更新靜音圖示
         }
         
-        // 渲染歌曲列表
+        // 渲染歌曲列表並高亮當前播放歌曲
         function renderSongList() {
             songListElement.innerHTML = ''; // 清空現有列表
             if (audioPlaylist.length === 0) {
@@ -867,12 +889,21 @@
                 li.textContent = song.name;
 
                 // 高亮當前播放的歌曲
-                if (index === currentAudioIndex && !backgroundMusic.paused && backgroundMusic.src === song.path) {
-                    li.classList.add('active');
-                }
+                // 判斷是否活躍：當前索引匹配 AND (音樂未暫停 AND src匹配)
+                const isActive = (index === currentAudioIndex && !backgroundMusic.paused && backgroundMusic.src === song.path);
+                li.classList.toggle('active', isActive);
+
                 songListElement.appendChild(li);
             });
         }
+
+        // 當音樂播放狀態改變時，更新歌曲列表UI (例如播放/暫停圖示)
+        function updateSongListUI() {
+            if (settingsModal.classList.contains('is-active')) { // 只有在設定頁開啟時才更新
+                renderSongList();
+            }
+        }
+
 
         // 顯示設定模態框
         function showSettingsModal() {
